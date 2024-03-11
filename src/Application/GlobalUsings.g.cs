@@ -1,0 +1,10 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Text;
+global using System.Threading.Tasks;
+global using Domain.Abstractions;
+global using Domain.Entities;
+global using Domain.Exceptions;
+global using Domain.Primitives;
+global using Application.Abstractions.Messaging;
