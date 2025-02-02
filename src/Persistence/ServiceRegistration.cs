@@ -4,22 +4,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Persistence.Contexts;
 using Persistence.Repositories.Test;
 
-namespace Persistence
+namespace Persistence;
+
+public static class ServiceRegistration
 {
-    public static class ServiceRegistration
+    public static void AddPersistenceServices(this IServiceCollection services)
     {
-        public static void AddPersistenceServices(this IServiceCollection services)
-        {
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.ConnectionString));
-            services.AddScoped<IUnitOfWork>(factory => factory.GetRequiredService<AppDbContext>());
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.ConnectionString));
+        services.AddScoped<IUnitOfWork>(factory => factory.GetRequiredService<AppDbContext>());
 
-            using var scope = services.BuildServiceProvider().CreateScope();
+        using IServiceScope scope = services.BuildServiceProvider().CreateScope();
 
-            using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        using AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            // dbContext.Database.MigrateAsync().Wait();
+        // dbContext.Database.MigrateAsync().Wait();
 
-            services.AddTransient<ITestWriteRepository, TestWriteRepository>();
-        }
+        services.AddTransient<ITestWriteRepository, TestWriteRepository>();
     }
 }

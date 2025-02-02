@@ -1,23 +1,30 @@
+using API;
+using API.Controllers;
+using Application.Abstractions.EventBus;
 using Application.Behaviors;
-using MediatR;
+using Application.Futures.Test.CreateTest;
 using FluentValidation;
 using Infrastructure.MessageBroker;
-using Microsoft.Extensions.Options;
 using MassTransit;
-using Application.Abstractions.EventBus;
-using Application.Futures.Test.CreateTest;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Persistence;
+using Scalar.AspNetCore;
+using System.Reflection;
+using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddPersistenceServices();
 
-var presentationAssembly = typeof(Presentation.AssemblyReference).Assembly;
+Assembly presentationAssembly = typeof(Presentation.AssemblyReference).Assembly;
 
 builder.Services.AddControllers()
     .AddApplicationPart(presentationAssembly);
 
-var applicationAssembly = typeof(Application.AssemblyReference).Assembly;
+Assembly applicationAssembly = typeof(Application.AssemblyReference).Assembly;
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
 
@@ -29,6 +36,11 @@ builder.Services
     .Configure<MessageBrokerSettings>(
     builder.Configuration.GetSection("MessageBroker"));
 
+IConfigurationSection jwtConfig = builder.Configuration.GetSection("Jwt");
+byte[] key = Encoding.UTF8.GetBytes(jwtConfig["Key"]!);
+
+builder.Services.AddScoped<TokenService>();
+
 builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
 
@@ -38,10 +50,7 @@ builder.Services.AddMassTransit(busConfigurator =>
 
     busConfigurator.AddConsumer<TestCreatedEventConsumer>();
 
-    busConfigurator.UsingInMemory((context, cfg) =>
-    {
-        cfg.ConfigureEndpoints(context);
-    });
+    busConfigurator.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
 
     /*
     busConfigurator.UsingRabbitMq((context, configurator) =>
@@ -60,23 +69,54 @@ builder.Services.AddMassTransit(busConfigurator =>
 builder.Services.AddTransient<IEventBus, EventBus>();
 
 // services.AddTransient<ExceptionHandlingMiddleware>();
+builder
+    .Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtConfig["Issuer"],
+            ValidAudience = jwtConfig["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        });
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddOpenApi(opt => opt.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+
+builder.Services.AddAuthorizationBuilder();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
-
+WebApplication app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference(options => options
+            .WithTitle("Example API")
+            .WithTheme(ScalarTheme.DeepSpace)
+            .WithDownloadButton(true)
+            .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios)
+            .WithCustomCss("")
+            .WithSidebar(true)
+            .WithHttpBearerAuthentication(new HttpBearerOptions {
+                Token = ""
+            })
+    );
 }
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/test", () => "Hello World!").RequireAuthorization();
 
 app.Run();
