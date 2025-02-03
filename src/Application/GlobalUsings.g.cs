@@ -8,3 +8,4 @@ global using Domain.Entities;
 global using Domain.Exceptions;
 global using Domain.Primitives;
 global using Application.Abstractions.Messaging;
+global using Shared.Attributes;

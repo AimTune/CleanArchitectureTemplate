@@ -1,5 +1,6 @@
 using API;
 using API.Controllers;
+using API.Extensions;
 using Application.Abstractions.EventBus;
 using Application.Behaviors;
 using Application.Futures.Test.CreateTest;
@@ -32,9 +33,7 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 
 builder.Services.AddValidatorsFromAssembly(applicationAssembly);
 
-builder.Services
-    .Configure<MessageBrokerSettings>(
-    builder.Configuration.GetSection("MessageBroker"));
+builder.Services.AddOptionsExtensions(builder.Configuration);
 
 IConfigurationSection jwtConfig = builder.Configuration.GetSection("Jwt");
 byte[] key = Encoding.UTF8.GetBytes(jwtConfig["Key"]!);

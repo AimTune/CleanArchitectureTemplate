@@ -7,3 +7,4 @@ global using Domain.Abstractions;
 global using Domain.Entities;
 global using Domain.Exceptions;
 global using Domain.Primitives;
+global using Shared.Attributes;
