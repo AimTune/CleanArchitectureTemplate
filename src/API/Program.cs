@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 using Scalar.AspNetCore;
+using Shared.Extensions;
 using System.Reflection;
 using System.Text;
 
@@ -21,6 +22,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddPersistenceServices();
 
 Assembly presentationAssembly = typeof(Presentation.AssemblyReference).Assembly;
+
+builder.Services
+    .AddOpenTelemetryExtensions(builder.Configuration);
 
 builder.Services.AddControllers()
     .AddApplicationPart(presentationAssembly);
