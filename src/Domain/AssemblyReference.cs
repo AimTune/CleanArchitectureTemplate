@@ -1,4 +1,4 @@
-﻿namespace Application;
+﻿namespace Domain;
 
 public static class AssemblyReference
 {
