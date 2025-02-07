@@ -1,6 +1,5 @@
-﻿namespace Persistence
+﻿namespace Persistence;
+
+public static class AssemblyReference
 {
-    public static class AssemblyReference
-    {
-    }
 }

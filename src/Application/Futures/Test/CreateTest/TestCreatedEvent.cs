@@ -1,8 +1,7 @@
-﻿namespace Application.Futures.Test.CreateTest
+﻿namespace Application.Futures.Test.CreateTest;
+
+public class TestCreatedEvent
 {
-    public class TestCreatedEvent
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

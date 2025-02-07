@@ -8,7 +8,7 @@ namespace Persistence;
 
 public static class ServiceRegistration
 {
-    public static void AddPersistenceServices(this IServiceCollection services)
+    public static IServiceCollection AddPersistenceServices(this IServiceCollection services)
     {
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(Configuration.ConnectionString));
         services.AddScoped<IUnitOfWork>(factory => factory.GetRequiredService<AppDbContext>());
@@ -20,5 +20,7 @@ public static class ServiceRegistration
         // dbContext.Database.MigrateAsync().Wait();
 
         services.AddTransient<ITestWriteRepository, TestWriteRepository>();
+
+        return services;
     }
 }

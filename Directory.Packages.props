@@ -6,6 +6,7 @@
     <!--Others-->
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <!--Queue, Event vb-->
     <PackageVersion Include="MassTransit" Version="8.3.6" />
     <PackageVersion Include="MediatR" Version="12.4.1" />

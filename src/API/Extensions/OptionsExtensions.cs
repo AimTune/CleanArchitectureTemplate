@@ -5,7 +5,7 @@ namespace API.Extensions;
 
 public static class OptionsExtensions
 {
-    public static void AddOptionsExtensions(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOptionsExtensions(this IServiceCollection services, IConfiguration configuration)
     {
         Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -25,5 +25,7 @@ public static class OptionsExtensions
                 }
             }
         }
+
+        return services;
     }
 }

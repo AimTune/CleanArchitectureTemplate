@@ -1,3 +1,5 @@
+using Application.Futures.Test.CreateTest;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
@@ -6,7 +8,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController(ILogger<WeatherForecastController> logger) : ControllerBase
+public class WeatherForecastController(ILogger<WeatherForecastController> logger, IMediator mediator) : ControllerBase
 {
     private static readonly string[] Summaries =
     [
@@ -15,8 +17,9 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
 
     [HttpGet(Name = "GetWeatherForecast")]
     [AllowAnonymous]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<List<WeatherForecast>> Get()
     {
+        await mediator.Send(new CreateTestCommand { Name = $"WeatherForecast Example {DateTime.Now}" });
         logger.LogWarning("WeatherForecastActivity Started");
         using System.Diagnostics.Activity? activity = ActivitySourceProvider.Source.StartActivity("WeatherForecastActivity");
         activity?.AddEvent(new($"WeatherForecast {DateTime.Now}"));
@@ -25,6 +28,6 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
             TemperatureC = Random.Shared.Next(-20, 55),
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         })
-        .ToArray();
+        .ToList();
     }
 }

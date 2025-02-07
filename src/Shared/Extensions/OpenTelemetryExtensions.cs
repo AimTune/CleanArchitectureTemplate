@@ -11,7 +11,7 @@ using System.Diagnostics;
 namespace Shared.Extensions;
 public static class OpenTelemetryExtensions
 {
-    public static void AddOpenTelemetryExtensions(this IServiceCollection services,
+    public static IServiceCollection AddOpenTelemetryExtensions(this IServiceCollection services,
         IConfiguration configuration,
         Action<Activity, Exception>? aspnetEnrichWithException = default
     )
@@ -46,7 +46,10 @@ public static class OpenTelemetryExtensions
 
                 options.AddOtlpExporterSettings(otelSettings);
             });
+
+        return services;
     }
+
     public static void AddAspNetCoreInstrumentationSettings(this TracerProviderBuilder tracerProviderBuilder,
         OpenTelemetrySettings otelSettings,
         Action<Activity, Exception>? aspnetEnrichWithException)
